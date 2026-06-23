@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RefreshRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -36,6 +37,29 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $raw,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+        ]);
+    }
+
+    public function refresh(RefreshRequest $request): JsonResponse
+    {
+        $row = RefreshToken::where('token_hash', hash('sha256', $request->refresh_token))
+            ->whereNull('revoked_at')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (! $row) {
+            return response()->json(['message' => 'Invalid refresh token'], 401);
+        }
+
+        $user = User::find($row->user_id);
+        if (! $user || ! $user->is_active) {
+            return response()->json(['message' => 'Invalid refresh token'], 401);
+        }
+
+        return response()->json([
+            'access_token' => JWTAuth::fromUser($user),
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ]);
