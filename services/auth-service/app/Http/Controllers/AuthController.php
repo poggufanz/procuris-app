@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshRequest;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -76,6 +77,26 @@ class AuthController extends Controller
     {
         $user = User::create($request->validated());
         return response()->json($user, 201);
+    }
+
+    public function update(UpdateUserRequest $request, int $id): JsonResponse
+    {
+        $user = User::find($id);
+        if (! $user) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+        $user->update($request->validated());
+        return response()->json($user->fresh());
+    }
+
+    public function deactivate(int $id): JsonResponse
+    {
+        $user = User::find($id);
+        if (! $user) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+        $user->update(['is_active' => false]);
+        return response()->json($user->fresh());
     }
 
     public function me(): JsonResponse

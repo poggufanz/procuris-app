@@ -14,6 +14,8 @@ Route::prefix('auth')->group(function () {
         Route::middleware('role.superadmin')->group(function () {
             Route::get('users', [\App\Http\Controllers\AuthController::class, 'index']);
             Route::post('users', [\App\Http\Controllers\AuthController::class, 'store']);
+            Route::put('users/{id}', [\App\Http\Controllers\AuthController::class, 'update']);
+            Route::patch('users/{id}/deactivate', [\App\Http\Controllers\AuthController::class, 'deactivate']);
         });
     });
 });
