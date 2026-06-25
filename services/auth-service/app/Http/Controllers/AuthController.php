@@ -64,4 +64,13 @@ class AuthController extends Controller
             'expires_in' => config('jwt.ttl') * 60,
         ]);
     }
+
+    public function logout(RefreshRequest $request): JsonResponse
+    {
+        RefreshToken::where('token_hash', hash('sha256', $request->refresh_token))
+            ->whereNull('revoked_at')
+            ->update(['revoked_at' => now()]);
+
+        return response()->json(['message' => 'Logged out']);
+    }
 }
