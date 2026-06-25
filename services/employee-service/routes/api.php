@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PositionController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +24,14 @@ Route::middleware('auth.remote')->group(function () {
         Route::post('positions', [PositionController::class, 'store']);
         Route::put('positions/{id}', [PositionController::class, 'update']);
         Route::delete('positions/{id}', [PositionController::class, 'destroy']);
+    });
+
+    Route::get('employees', [EmployeeController::class, 'index']);
+    Route::get('employees/{id}', [EmployeeController::class, 'show'])->whereNumber('id');
+
+    Route::middleware('role:superadmin,admin_hrd,admin_cabang')->group(function () {
+        Route::post('employees', [EmployeeController::class, 'store']);
+        Route::put('employees/{id}', [EmployeeController::class, 'update']);
+        Route::delete('employees/{id}', [EmployeeController::class, 'destroy']);
     });
 });
