@@ -12,9 +12,9 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: db_auth
-      DB_USERNAME: ${DB_USERNAME:-procuris}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
-      JWT_SECRET: ${JWT_SECRET}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET required}
     depends_on:
       db:
         condition: service_healthy
@@ -23,9 +23,9 @@ services:
     image: mysql:8
     environment:
       MYSQL_DATABASE: db_auth
-      MYSQL_USER: ${DB_USERNAME:-procuris}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+      MYSQL_USER: ${DB_USERNAME:?DB_USERNAME required}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD required}
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
