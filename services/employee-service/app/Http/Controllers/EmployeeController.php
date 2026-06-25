@@ -6,6 +6,7 @@ use App\Http\Requests\EmployeeIndexRequest;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Support\OrgChart;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -97,5 +98,10 @@ class EmployeeController extends Controller
 
         $employee->delete();
         return response()->json(null, 204);
+    }
+
+    public function orgTree(): JsonResponse
+    {
+        return response()->json(OrgChart::build());
     }
 }
