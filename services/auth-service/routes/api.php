@@ -10,5 +10,10 @@ Route::prefix('auth')->group(function () {
 
     Route::middleware('auth:api')->group(function () {
         Route::get('me', [\App\Http\Controllers\AuthController::class, 'me']);
+
+        Route::middleware('role.superadmin')->group(function () {
+            Route::get('users', [\App\Http\Controllers\AuthController::class, 'index']);
+            Route::post('users', [\App\Http\Controllers\AuthController::class, 'store']);
+        });
     });
 });

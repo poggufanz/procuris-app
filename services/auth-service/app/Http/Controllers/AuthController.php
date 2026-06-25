@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshRequest;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -64,6 +65,17 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'expires_in' => config('jwt.ttl') * 60,
         ]);
+    }
+
+    public function index(): JsonResponse
+    {
+        return response()->json(User::all());
+    }
+
+    public function store(StoreUserRequest $request): JsonResponse
+    {
+        $user = User::create($request->validated());
+        return response()->json($user, 201);
     }
 
     public function me(): JsonResponse
