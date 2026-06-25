@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\PositionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth.remote')->group(function () {
@@ -12,5 +13,15 @@ Route::middleware('auth.remote')->group(function () {
         Route::post('branches', [BranchController::class, 'store']);
         Route::put('branches/{id}', [BranchController::class, 'update']);
         Route::patch('branches/{id}/deactivate', [BranchController::class, 'deactivate']);
+    });
+
+    Route::get('positions', [PositionController::class, 'index']);
+    Route::get('positions/tree', [PositionController::class, 'tree']);
+    Route::get('positions/{id}', [PositionController::class, 'show'])->whereNumber('id');
+
+    Route::middleware('role:superadmin,admin_hrd')->group(function () {
+        Route::post('positions', [PositionController::class, 'store']);
+        Route::put('positions/{id}', [PositionController::class, 'update']);
+        Route::delete('positions/{id}', [PositionController::class, 'destroy']);
     });
 });
