@@ -7,4 +7,8 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:login');
     Route::post('refresh', [\App\Http\Controllers\AuthController::class, 'refresh']);
     Route::post('logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+
+    Route::middleware('auth:api')->group(function () {
+        Route::get('me', [\App\Http\Controllers\AuthController::class, 'me']);
+    });
 });
