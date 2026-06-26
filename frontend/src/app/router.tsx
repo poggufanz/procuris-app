@@ -6,6 +6,7 @@ import { RequireAuth } from '@/app/guards/RequireAuth'
 import { RequireRole } from '@/app/guards/RequireRole'
 import { Forbidden } from '@/app/error/Forbidden'
 import { NotFound } from '@/app/error/NotFound'
+import { Spinner } from '@/components/shared/Spinner'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { EmployeesPage } from '@/features/hris/employees/EmployeesPage'
 import { EmployeeDetailPage } from '@/features/hris/employees/EmployeeDetailPage'
@@ -24,7 +25,7 @@ const PurchasingDash = lazy(() => import('@/features/purchasing/dashboard/Dashbo
 
 function AppRoutes() {
   return (
-    <Suspense fallback={<div className="p-6">Memuat…</div>}>
+    <Suspense fallback={<Spinner />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/403" element={<Forbidden />} />

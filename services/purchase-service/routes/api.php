@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth.remote')->group(function () {
+    Route::get('purchasing/dashboard', [DashboardController::class, 'index'])
+        ->middleware('role:superadmin,admin_purchasing,staff_purchasing,admin_cabang');
+
     Route::middleware('role:superadmin,admin_purchasing,staff_purchasing,admin_cabang')->group(function () {
         Route::get('vendors', [VendorController::class, 'index']);
         Route::get('vendors/{id}', [VendorController::class, 'show'])->whereNumber('id');

@@ -1,5 +1,6 @@
 import { useHrisDashboard } from './api'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { Spinner } from '@/components/shared/Spinner'
 import { format } from '@/lib/format'
 
 function Stat({ label, value }: { label: string; value: number | string }) {
@@ -10,8 +11,9 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 }
 
 export default function DashboardPage() {
-  const { data } = useHrisDashboard()
-  if (!data) return <div>Memuat…</div>
+  const { data, isError } = useHrisDashboard()
+  if (isError) return <div className="p-6 text-sm text-[var(--muted)]">Gagal memuat dashboard. Coba muat ulang.</div>
+  if (!data) return <Spinner />
   const maxDivision = Math.max(1, ...data.perDivision.map((d) => d.count))
   return (
     <div>

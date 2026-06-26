@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { usePurchasingDashboard } from './api'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { Spinner } from '@/components/shared/Spinner'
 import { StatusBadge, type POStatus } from '@/components/shared/StatusBadge'
 import { format } from '@/lib/format'
 
@@ -14,8 +15,9 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 }
 
 export default function DashboardPage() {
-  const { data } = usePurchasingDashboard()
-  if (!data) return <div>Memuat…</div>
+  const { data, isError } = usePurchasingDashboard()
+  if (isError) return <div className="p-6 text-sm text-[var(--muted)]">Gagal memuat dashboard. Coba muat ulang.</div>
+  if (!data) return <Spinner />
   const counts = new Map(data.byStatus.map((b) => [b.status, b.count]))
   return (
     <div>

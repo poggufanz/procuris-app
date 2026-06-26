@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\PositionController;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('branches', [BranchController::class, 'index']);
 
 Route::middleware('auth.remote')->group(function () {
+    Route::get('hris/dashboard', [DashboardController::class, 'index'])
+        ->middleware('role:superadmin,admin_hrd,admin_cabang');
+
     Route::get('branches/tree', [BranchController::class, 'tree']);
     Route::get('branches/{id}', [BranchController::class, 'show'])->whereNumber('id');
 
