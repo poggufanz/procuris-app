@@ -5,9 +5,12 @@ import { buildTree } from '@/lib/buildTree'
 import { TreeView, type TreeNode } from '@/components/shared/TreeView'
 import { Modal } from '@/components/shared/Modal'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
+import { EmptyState } from '@/components/shared/EmptyState'
+import { Skeleton } from '@/components/shared/Skeleton'
 import { Button } from '@/components/ui/button'
 
 const LEVELS: Record<number, string> = { 1: 'Staff', 2: 'Supervisor', 3: 'Manager', 4: 'Direktur' }
+const cardClass = 'rounded-xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[var(--shadow)]'
 
 export function PositionTab() {
   const { data, isLoading } = usePositions()
@@ -16,7 +19,14 @@ export function PositionTab() {
   const [deleting, setDeleting] = useState<Position | null>(null)
   const del = useDeletePosition()
 
-  if (isLoading || !data) return <div className="py-8 text-sm text-[var(--muted)]">Memuat…</div>
+  if (isLoading || !data) {
+    return (
+      <div className={`${cardClass} space-y-2`} role="status" aria-busy="true" aria-label="Memuat jabatan">
+        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-9" />)}
+      </div>
+    )
+  }
+
   const byId = new Map(data.map((p) => [p.id, p]))
   const nodes = buildTree(data, (p) => p.parent_position_id, (p) => ({ name: p.name, meta: `${LEVELS[p.level]} · ${p.division}` }))
 
@@ -27,17 +37,24 @@ export function PositionTab() {
 
   return (
     <div>
-      <div className="mb-3 flex justify-end">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <span className="text-sm text-[var(--muted)] tabular-nums">{data.length} jabatan</span>
         <Button onClick={() => setOpen(true)}>Tambah Jabatan</Button>
       </div>
-      <TreeView nodes={nodes} renderActions={(n: TreeNode) => {
-        const pos = byId.get(n.id)
-        if (!pos) return null
-        return <span className="flex gap-1">
-          <Button variant="ghost" onClick={() => setEditing(pos)}>Edit</Button>
-          <Button variant="ghost" onClick={() => setDeleting(pos)}>Hapus</Button>
-        </span>
-      }} />
+
+      <div className={`${cardClass} motion-safe:animate-[login-rise_.4s_cubic-bezier(.16,1,.3,1)]`}>
+        {data.length === 0
+          ? <EmptyState text="Belum ada jabatan" />
+          : <TreeView nodes={nodes} renderActions={(n: TreeNode) => {
+              const pos = byId.get(n.id)
+              if (!pos) return null
+              return <>
+                <Button variant="ghost" onClick={() => setEditing(pos)}>Edit</Button>
+                <Button variant="ghost" onClick={() => setDeleting(pos)}>Hapus</Button>
+              </>
+            }} />}
+      </div>
+
       <Modal open={open} title="Tambah Jabatan" onClose={() => setOpen(false)}>
         <PositionForm onDone={() => setOpen(false)} />
       </Modal>
