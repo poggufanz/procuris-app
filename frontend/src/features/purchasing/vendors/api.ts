@@ -8,7 +8,7 @@ interface Paginated<T> { data: T[]; total: number; per_page: number; current_pag
 export interface VendorFilters { q?: string; is_active?: boolean; page?: number }
 
 export function useVendors(filters: VendorFilters) {
-  return useQuery({ queryKey: qk.vendors.list(filters), queryFn: async () => (await api.get<Paginated<Vendor>>('/vendors', { params: filters })).data })
+  return useQuery({ queryKey: qk.vendors.list(filters as Record<string, unknown>), queryFn: async () => (await api.get<Paginated<Vendor>>('/vendors', { params: filters })).data })
 }
 export function useSaveVendor(id?: number) {
   const qc = useQueryClient()

@@ -14,7 +14,7 @@ interface Paginated<T> { data: T[]; total: number; per_page: number; current_pag
 export interface POFilters { status?: string; vendor_id?: number; branch_id?: number; date_from?: string; date_to?: string; page?: number }
 
 export function usePOList(filters: POFilters) {
-  return useQuery({ queryKey: qk.po.list(filters), queryFn: async () => (await api.get<Paginated<PurchaseOrder>>('/purchase-orders', { params: filters })).data })
+  return useQuery({ queryKey: qk.po.list(filters as Record<string, unknown>), queryFn: async () => (await api.get<Paginated<PurchaseOrder>>('/purchase-orders', { params: filters })).data })
 }
 
 export function useCreatePO() {

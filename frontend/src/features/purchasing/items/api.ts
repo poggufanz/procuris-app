@@ -8,7 +8,7 @@ interface Paginated<T> { data: T[]; total: number; per_page: number; current_pag
 export interface ItemFilters { q?: string; category?: string; is_active?: boolean; page?: number }
 
 export function useItems(filters: ItemFilters) {
-  return useQuery({ queryKey: qk.items.list(filters), queryFn: async () => (await api.get<Paginated<Item>>('/items', { params: filters })).data })
+  return useQuery({ queryKey: qk.items.list(filters as Record<string, unknown>), queryFn: async () => (await api.get<Paginated<Item>>('/items', { params: filters })).data })
 }
 export function useSaveItem(id?: number) {
   const qc = useQueryClient()
