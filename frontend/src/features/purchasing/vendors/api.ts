@@ -21,3 +21,9 @@ export function useDeactivateVendor() {
   const qc = useQueryClient()
   return useMutation({ mutationFn: async (id: number) => (await api.patch(`/vendors/${id}/deactivate`)).data, onSuccess: () => qc.invalidateQueries({ queryKey: ['vendors', 'list'] }) })
 }
+export function useVendor(id: number) {
+  return useQuery({ queryKey: qk.vendors.detail(id), queryFn: async () => (await api.get<Vendor>(`/vendors/${id}`)).data })
+}
+export function useVendorHistory(id: number) {
+  return useQuery({ queryKey: qk.vendors.history(id), queryFn: async () => (await api.get<Paginated<{ id: number; po_number: string; status: string; total_amount: number }>>(`/vendors/${id}/purchase-history`)).data.data })
+}
