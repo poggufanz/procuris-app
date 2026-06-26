@@ -1,6 +1,7 @@
 import http from 'node:http'
 
 const PORT = Number(process.env.GATEWAY_PORT || 8080)
+const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:5173'
 const T = {
   auth: process.env.AUTH_URL || 'http://127.0.0.1:8001',
   employee: process.env.EMPLOYEE_URL || 'http://127.0.0.1:8002',
@@ -38,9 +39,13 @@ http.createServer((req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204); return res.end() }
 
   const path = req.url.split('?')[0]
-  if (path === '/' || path === '/up' || path === '/health') {
+  if (path === '/up' || path === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ gateway: 'up', targets: T }))
+  }
+  if (path === '/') {
+    res.writeHead(302, { Location: `${FRONTEND}/login` })
+    return res.end()
   }
 
   const target = pick(path)
