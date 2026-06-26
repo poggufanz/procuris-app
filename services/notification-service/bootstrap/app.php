@@ -14,8 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'auth.remote' => \App\Http\Middleware\RemoteAuth::class,
-            'role'        => \App\Http\Middleware\EnsureRole::class,
+            'auth.remote'    => \App\Http\Middleware\RemoteAuth::class,
+            'role'           => \App\Http\Middleware\EnsureRole::class,
+            'service.secret' => \App\Http\Middleware\VerifyServiceSecret::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

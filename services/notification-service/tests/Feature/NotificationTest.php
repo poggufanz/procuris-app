@@ -7,13 +7,19 @@ it('401s without an Authorization header', function () {
     $this->getJson('/notifications')->assertStatus(401);
 });
 
+it('403s when notify is called without service secret', function () {
+    $this->postJson('/notify', [
+        'user_ids' => [1], 'type' => 'x', 'title' => 'T', 'body' => 'B',
+    ])->assertStatus(403);
+});
+
 it('pushes a notification and returns 201', function () {
     $this->postJson('/notify', [
         'user_ids' => [1, 2],
         'type' => 'po.submitted',
         'title' => 'PO Submitted',
         'body' => 'PO/BDG/2026/0001 has been submitted.',
-    ])->assertStatus(201)->assertJsonPath('created', 2);
+    ], serviceHeader())->assertStatus(201)->assertJsonPath('created', 2);
 });
 
 it('returns the inbox for the authenticated user', function () {
@@ -71,8 +77,9 @@ it('404s when marking another user notification as read', function () {
 });
 
 it('validates the push payload', function () {
-    $this->postJson('/notify', [])->assertStatus(422);
-    $this->postJson('/notify', ['user_ids' => [], 'type' => 'x', 'title' => 'T', 'body' => 'B'])->assertStatus(422);
+    $h = serviceHeader();
+    $this->postJson('/notify', [], $h)->assertStatus(422);
+    $this->postJson('/notify', ['user_ids' => [], 'type' => 'x', 'title' => 'T', 'body' => 'B'], $h)->assertStatus(422);
 });
 
 it('paginates notifications', function () {

@@ -27,5 +27,6 @@
         <env name="AUTH_SERVICE_URL" value="http://auth.test"/>
         <env name="EMPLOYEE_SERVICE_URL" value="http://employee.test"/>
         <env name="NOTIFICATION_TTL_DAYS" value="90"/>
+        <env name="SERVICE_SECRET" value="test-secret"/>
     </php>
 </phpunit>

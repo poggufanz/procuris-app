@@ -24,3 +24,8 @@ function flushNotifications(): void
 {
     ArrayNotificationRepository::flush();
 }
+
+function serviceHeader(): array
+{
+    return ['X-Service-Secret' => config('services.service_secret')];
+}
