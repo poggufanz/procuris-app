@@ -6,5 +6,5 @@ import { clearTokens } from '@/lib/auth/tokens'
 test('unauthenticated visit lands on login', async () => {
   clearTokens(); useAuthStore.setState({ user: null, status: 'idle' })
   render(<AppRouter initialEntries={['/hris/dashboard']} />)
-  await waitFor(() => expect(screen.getByText(/Masuk/i)).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByRole('button', { name: /Masuk/i })).toBeInTheDocument())
 })
