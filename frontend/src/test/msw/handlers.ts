@@ -37,4 +37,9 @@ export const handlers = [
   http.post('*/auth/users', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
   http.put('*/auth/users/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),
   http.patch('*/auth/users/:id/deactivate', ({ params }) => HttpResponse.json({ id: Number(params.id), is_active: false })),
+  http.get('*/hris/dashboard', () => HttpResponse.json({
+    totalActive: 248, totalBranches: 12,
+    perDivision: [{ division: 'IT', count: 30 }, { division: 'Finance', count: 18 }],
+    expiringContracts: [{ id: 1, nama_lengkap: 'Budi Santoso', tanggal_akhir_kontrak: '2026-07-10' }],
+  })),
 ]
