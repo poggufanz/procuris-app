@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { qk } from '@/lib/queryKeys'
 import type { EmployeeInput } from './schema'
+import type { TreeNode } from '@/components/shared/TreeView'
 
 export interface Employee {
   id: number; user_id: number; nama_lengkap: string; nomor_induk_karyawan: string; alamat: string
@@ -45,4 +46,10 @@ export function useBranchOptions() {
 }
 export function usePositionOptions() {
   return useQuery({ queryKey: qk.positions.list(), queryFn: async () => (await api.get<Paginated<{ id: number; name: string }>>('/positions')).data.data })
+}
+export function useEmployee(id: number) {
+  return useQuery({ queryKey: qk.employees.detail(id), queryFn: async () => (await api.get<Employee>(`/employees/${id}`)).data })
+}
+export function useOrgTree(id: number) {
+  return useQuery({ queryKey: qk.employees.orgTree(id), queryFn: async () => (await api.get<TreeNode>(`/employees/${id}/org-tree`)).data })
 }
