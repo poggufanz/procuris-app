@@ -70,7 +70,7 @@ class AuthController extends Controller
 
     public function index(): JsonResponse
     {
-        return response()->json(User::all());
+        return response()->json(User::paginate(15));
     }
 
     public function store(StoreUserRequest $request): JsonResponse

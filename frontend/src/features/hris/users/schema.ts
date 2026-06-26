@@ -5,7 +5,7 @@ export const userSchema = z.object({
   email: z.string().email('Email tidak valid'),
   role: z.enum(ROLES),
   branch_id: z.coerce.number().int().nullable().default(null),
-  password: z.string().min(6, 'Minimal 6 karakter').optional(),
+  password: z.string().min(8, 'Minimal 8 karakter').optional(),
 })
 export type UserFormInput = z.input<typeof userSchema>
 export type UserInput = z.infer<typeof userSchema>
