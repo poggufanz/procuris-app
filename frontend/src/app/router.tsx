@@ -14,6 +14,7 @@ import { UsersPage } from '@/features/hris/users/UsersPage'
 import { VendorsPage } from '@/features/purchasing/vendors/VendorsPage'
 import { VendorDetailPage } from '@/features/purchasing/vendors/VendorDetailPage'
 import { ItemsPage } from '@/features/purchasing/items/ItemsPage'
+import { POListPage } from '@/features/purchasing/po/POListPage'
 
 const HrisDash = lazy(() => import('@/features/hris/dashboard/DashboardPage'))
 const PurchasingDash = lazy(() => import('@/features/purchasing/dashboard/DashboardPage'))
@@ -40,6 +41,7 @@ function AppRoutes() {
             </Route>
             <Route element={<RequireRole roles={['superadmin','admin_purchasing','admin_cabang','staff_purchasing']} />}>
               <Route path="/purchasing/dashboard" element={<PurchasingDash />} />
+              <Route path="/purchasing/purchase-orders" element={<POListPage />} />
             </Route>
             <Route element={<RequireRole roles={['superadmin','admin_purchasing']} />}>
               <Route path="/purchasing/vendors" element={<VendorsPage />} />
