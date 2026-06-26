@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import { branches, positions, employees, users } from './hris.fixtures'
 
 // minimal JWT with a far-future exp
 const jwt = (role: string, branch: number | null) =>
@@ -20,4 +21,20 @@ export const handlers = [
   http.get('*/auth/me', () =>
     HttpResponse.json({ id: 1, name: 'Super Admin', email: 'admin@procuris.test', role: 'superadmin', branch_id: null, is_active: true }),
   ),
+  http.get('*/employees', () => HttpResponse.json({ data: employees, total: employees.length, per_page: 15, current_page: 1 })),
+  http.get('*/employees/:id/org-tree', () => HttpResponse.json({ id: 2, name: 'Staff IT', children: [] })),
+  http.get('*/employees/:id', ({ params }) => HttpResponse.json(employees.find((e) => e.id === Number(params.id)) ?? employees[0])),
+  http.post('*/employees', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
+  http.put('*/employees/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),
+  http.patch('*/employees/:id/deactivate', ({ params }) => HttpResponse.json({ id: Number(params.id), status: 'nonaktif' })),
+  http.get('*/branches', () => HttpResponse.json({ data: branches, total: branches.length, per_page: 1000, current_page: 1 })),
+  http.post('*/branches', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
+  http.put('*/branches/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),
+  http.get('*/positions', () => HttpResponse.json({ data: positions, total: positions.length, per_page: 1000, current_page: 1 })),
+  http.post('*/positions', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
+  http.put('*/positions/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),
+  http.get('*/auth/users', () => HttpResponse.json({ data: users, total: users.length, per_page: 15, current_page: 1 })),
+  http.post('*/auth/users', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
+  http.put('*/auth/users/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),
+  http.patch('*/auth/users/:id/deactivate', ({ params }) => HttpResponse.json({ id: Number(params.id), is_active: false })),
 ]
