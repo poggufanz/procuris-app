@@ -17,3 +17,10 @@ export function useSavePosition(id?: number) {
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.positions.list() }),
   })
 }
+export function useDeletePosition() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => (await api.delete(`/positions/${id}`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.positions.list() }),
+  })
+}

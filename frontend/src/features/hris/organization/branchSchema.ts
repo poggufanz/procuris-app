@@ -6,4 +6,5 @@ export const branchSchema = z.object({
   address: z.string().nullable().default(null),
   is_active: z.boolean().default(true),
 })
+export type BranchFormInput = z.input<typeof branchSchema>
 export type BranchInput = z.infer<typeof branchSchema>

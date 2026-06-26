@@ -11,7 +11,7 @@ export interface Employee {
   status: 'aktif' | 'nonaktif' | 'kontrak_berakhir'
 }
 export interface Paginated<T> { data: T[]; total: number; per_page: number; current_page: number }
-export interface EmployeeFilters { status?: string; branch_id?: number; division?: string; page?: number }
+export interface EmployeeFilters { status?: string; branch_id?: number; division?: string; level?: number; page?: number }
 
 export function useEmployees(filters: EmployeeFilters) {
   return useQuery({

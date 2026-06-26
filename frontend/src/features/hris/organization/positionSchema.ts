@@ -6,4 +6,5 @@ export const positionSchema = z.object({
   parent_position_id: z.coerce.number().int().nullable().default(null),
   branch_id: z.coerce.number().int().nullable().default(null),
 })
+export type PositionFormInput = z.input<typeof positionSchema>
 export type PositionInput = z.infer<typeof positionSchema>

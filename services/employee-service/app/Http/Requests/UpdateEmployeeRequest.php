@@ -16,7 +16,7 @@ class UpdateEmployeeRequest extends FormRequest
         return [
             'user_id'                 => ['required', 'integer', Rule::unique('employees', 'user_id')->ignore($id)],
             'nama_lengkap'            => ['required', 'string', 'max:150'],
-            'nomor_induk_karyawan'    => ['required', 'string', 'max:30', Rule::unique('employees', 'nomor_induk_karyawan')->ignore($id)],
+            'nomor_induk_karyawan'    => ['required', 'string', 'max:30', 'regex:/^\d{4}\.\d{2}\.\d+$/', Rule::unique('employees', 'nomor_induk_karyawan')->ignore($id)],
             'alamat'                  => ['required', 'string'],
             'branch_id'               => ['required', 'integer', 'exists:branches,id'],
             'position_id'             => ['required', 'integer', 'exists:positions,id'],

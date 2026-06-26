@@ -13,6 +13,8 @@ class EmployeeIndexRequest extends FormRequest
         return [
             'branch_id'   => ['nullable', 'integer', 'exists:branches,id'],
             'position_id' => ['nullable', 'integer', 'exists:positions,id'],
+            'division'    => ['nullable', 'string', 'max:100'],
+            'level'       => ['nullable', 'integer'],
             'status'      => ['nullable', 'in:aktif,nonaktif,kontrak_berakhir'],
             'search'      => ['nullable', 'string', 'max:100'],
         ];

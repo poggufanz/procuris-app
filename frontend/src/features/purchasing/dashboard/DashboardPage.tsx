@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { usePurchasingDashboard } from './api'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { StatusBadge } from '@/components/shared/StatusBadge'
+import { StatusBadge, type POStatus } from '@/components/shared/StatusBadge'
 import { format } from '@/lib/format'
+
+const PO_STATUSES: POStatus[] = ['draft', 'submitted', 'approved', 'rejected', 'received', 'cancelled']
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
@@ -14,6 +16,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 export default function DashboardPage() {
   const { data } = usePurchasingDashboard()
   if (!data) return <div>Memuat…</div>
+  const counts = new Map(data.byStatus.map((b) => [b.status, b.count]))
   return (
     <div>
       <PageHeader title="Dashboard Purchasing" />
@@ -21,6 +24,17 @@ export default function DashboardPage() {
         <Stat label="PO bulan ini" value={data.poThisMonth} />
         <Stat label="Menunggu approval" value={data.pendingApproval} />
         <Stat label="Total nilai PO" value={format.rupiah(data.totalValue)} />
+      </div>
+      <div className="mt-6">
+        <h2 className="mb-2 text-xs uppercase tracking-wide text-[var(--muted)]">Breakdown PO per status</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+          {PO_STATUSES.map((s) => (
+            <div key={s} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="mb-1 text-2xl font-bold tracking-tight">{counts.get(s) ?? 0}</div>
+              <StatusBadge status={s} />
+            </div>
+          ))}
+        </div>
       </div>
       <div className="mt-6 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full text-sm">

@@ -16,6 +16,7 @@ import { VendorDetailPage } from '@/features/purchasing/vendors/VendorDetailPage
 import { ItemsPage } from '@/features/purchasing/items/ItemsPage'
 import { POListPage } from '@/features/purchasing/po/POListPage'
 import { POCreatePage } from '@/features/purchasing/po/POCreatePage'
+import { POEditItemsPage } from '@/features/purchasing/po/POEditItemsPage'
 import { PODetailPage } from '@/features/purchasing/po/PODetailPage'
 
 const HrisDash = lazy(() => import('@/features/hris/dashboard/DashboardPage'))
@@ -45,6 +46,7 @@ function AppRoutes() {
               <Route path="/purchasing/dashboard" element={<PurchasingDash />} />
               <Route path="/purchasing/purchase-orders" element={<POListPage />} />
               <Route path="/purchasing/purchase-orders/new" element={<POCreatePage />} />
+              <Route path="/purchasing/purchase-orders/:id/edit" element={<POEditItemsPage />} />
               <Route path="/purchasing/purchase-orders/:id" element={<PODetailPage />} />
             </Route>
             <Route element={<RequireRole roles={['superadmin','admin_purchasing']} />}>

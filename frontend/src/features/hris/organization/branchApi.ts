@@ -17,3 +17,10 @@ export function useSaveBranch(id?: number) {
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.branches.list() }),
   })
 }
+export function useDeactivateBranch() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => (await api.patch(`/branches/${id}/deactivate`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.branches.list() }),
+  })
+}

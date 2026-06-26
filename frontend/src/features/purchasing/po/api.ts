@@ -28,6 +28,15 @@ export function useCreatePO() {
 export function usePO(id: number) {
   return useQuery({ queryKey: qk.po.detail(id), queryFn: async () => (await api.get<PurchaseOrder>(`/purchase-orders/${id}`)).data })
 }
+
+export interface POItemInput { item_id: number; quantity: number; unit_price: number }
+export function useUpdatePOItems(id: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (items: POItemInput[]) => (await api.put<PurchaseOrder>(`/purchase-orders/${id}/items`, { items })).data,
+    onSuccess: (po) => { qc.setQueryData(qk.po.detail(id), po); qc.invalidateQueries({ queryKey: ['po', 'list'] }) },
+  })
+}
 type Transition = 'submit' | 'approve' | 'receive' | 'cancel'
 export function useTransitionPO(id: number) {
   const qc = useQueryClient()

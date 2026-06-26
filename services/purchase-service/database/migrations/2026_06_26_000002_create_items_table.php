@@ -14,10 +14,12 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->string('category', 100)->index();
             $table->string('unit', 30);
-            $table->unsignedBigInteger('default_vendor_id')->nullable()->index();
+            $table->unsignedBigInteger('default_vendor_id')->nullable();
             $table->decimal('last_price', 15, 2)->nullable();
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
+
+            $table->foreign('default_vendor_id')->references('id')->on('vendors')->nullOnDelete();
         });
     }
 

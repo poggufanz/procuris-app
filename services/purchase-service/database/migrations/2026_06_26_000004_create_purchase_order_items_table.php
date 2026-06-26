@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('purchase_order_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('purchase_order_id');
-            $table->unsignedBigInteger('item_id')->index();
+            $table->unsignedBigInteger('item_id');
             $table->string('item_name', 200);
             $table->decimal('quantity', 10, 2);
             $table->string('unit', 30);
@@ -21,6 +21,7 @@ return new class extends Migration {
 
             $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->cascadeOnDelete();
             $table->index('purchase_order_id');
+            $table->foreign('item_id')->references('id')->on('items');
         });
     }
 

@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('branch_id');
             $table->string('branch_name', 100);
             $table->string('branch_code', 20);
-            $table->unsignedBigInteger('vendor_id')->index();
+            $table->unsignedBigInteger('vendor_id');
             $table->unsignedBigInteger('requested_by');
             $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'received', 'cancelled'])->default('draft');
             $table->date('tanggal_po');
@@ -28,6 +28,8 @@ return new class extends Migration {
             $table->index(['branch_id', 'status']);
             $table->index('status');
             $table->index('tanggal_po');
+
+            $table->foreign('vendor_id')->references('id')->on('vendors');
         });
     }
 
