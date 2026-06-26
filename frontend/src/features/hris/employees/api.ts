@@ -15,7 +15,7 @@ export interface EmployeeFilters { status?: string; branch_id?: number; division
 
 export function useEmployees(filters: EmployeeFilters) {
   return useQuery({
-    queryKey: qk.employees.list(filters),
+    queryKey: qk.employees.list(filters as Record<string, unknown>),
     queryFn: async () => (await api.get<Paginated<Employee>>('/employees', { params: filters })).data,
   })
 }

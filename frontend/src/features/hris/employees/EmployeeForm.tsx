@@ -1,13 +1,13 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { employeeSchema, type EmployeeInput } from './schema'
+import { employeeSchema, type EmployeeFormInput, type EmployeeInput } from './schema'
 import { useCreateEmployee, useUpdateEmployee, useBranchOptions, usePositionOptions, type Employee } from './api'
 import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
 export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeFormInput, unknown, EmployeeInput>({
     resolver: zodResolver(employeeSchema),
     defaultValues: employee ?? { tanggal_akhir_kontrak: null },
   })

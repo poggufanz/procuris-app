@@ -23,7 +23,7 @@ export function DataTable<T>({ columns, rows, isLoading, emptyText = 'Tidak ada 
           {table.getRowModel().rows.map((r) => (
             <tr key={r.id} className="border-t border-[var(--border)]">
               {r.getVisibleCells().map((c) => (
-                <td key={c.id} className="px-3 py-2">{flexRender(c.column.columnDef.cell ?? c.column.columnDef.header, c.getContext())}</td>
+                <td key={c.id} className="px-3 py-2">{flexRender(c.column.columnDef.cell, c.getContext())}</td>
               ))}
             </tr>
           ))}

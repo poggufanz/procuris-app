@@ -9,4 +9,5 @@ export const employeeSchema = z.object({
   tanggal_mulai_kontrak: z.string().min(1, 'Tanggal mulai kontrak wajib diisi'),
   tanggal_akhir_kontrak: z.string().nullable().default(null),
 })
+export type EmployeeFormInput = z.input<typeof employeeSchema>
 export type EmployeeInput = z.infer<typeof employeeSchema>

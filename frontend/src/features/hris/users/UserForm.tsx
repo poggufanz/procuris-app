@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { userSchema, type UserInput } from './schema'
+import { userSchema, type UserFormInput, type UserInput } from './schema'
 import { useSaveUser, type UserAccount } from './api'
 import { useBranches } from '@/features/hris/organization/branchApi'
 import { ROLES } from '@/config/roles'
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
 export function UserForm({ user, onDone }: { user?: UserAccount; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<UserInput>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<UserFormInput, unknown, UserInput>({
     resolver: zodResolver(userSchema),
     defaultValues: user ?? { branch_id: null },
   })
