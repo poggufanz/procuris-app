@@ -11,7 +11,9 @@ const T = {
 
 const ROUTES = [
   [/^\/auth(\/|$)/, T.auth],
+  [/^\/hris(\/|$)/, T.employee],
   [/^\/(branches|positions|employees)(\/|$)/, T.employee],
+  [/^\/purchasing(\/|$)/, T.purchase],
   [/^\/(vendors|items|purchase-orders)(\/|$)/, T.purchase],
   [/^\/notifications(\/|$)/, T.notification],
 ]
