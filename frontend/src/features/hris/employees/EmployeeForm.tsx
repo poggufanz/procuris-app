@@ -9,7 +9,7 @@ import { getApiError } from '@/lib/apiError'
 export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone: () => void }) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeFormInput, unknown, EmployeeInput>({
     resolver: zodResolver(employeeSchema),
-    defaultValues: employee ?? { tanggal_akhir_kontrak: null },
+    defaultValues: employee ?? { tanggal_akhir_kontrak: null, status: 'aktif' },
   })
   const branches = useBranchOptions()
   const positions = usePositionOptions()
@@ -28,12 +28,18 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
   const field = 'mb-1 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm'
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+      <label htmlFor="user">User ID</label>
+      <input id="user" type="number" {...register('user_id')} className={field} disabled={!!employee} />
+      {errors.user_id && <p className="text-xs text-red-600">{errors.user_id.message}</p>}
       <label htmlFor="nama">Nama</label>
       <input id="nama" {...register('nama_lengkap')} className={field} />
       {errors.nama_lengkap && <p className="text-xs text-red-600">{errors.nama_lengkap.message}</p>}
       <label htmlFor="nik">NIK</label>
-      <input id="nik" {...register('nomor_induk_karyawan')} className={field} />
+      <input id="nik" placeholder="2026.01.123" {...register('nomor_induk_karyawan')} className={field} />
       {errors.nomor_induk_karyawan && <p className="text-xs text-red-600">{errors.nomor_induk_karyawan.message}</p>}
+      <label htmlFor="alamat">Alamat</label>
+      <textarea id="alamat" {...register('alamat')} className={field} rows={2} />
+      {errors.alamat && <p className="text-xs text-red-600">{errors.alamat.message}</p>}
       <label htmlFor="branch">Cabang</label>
       <select id="branch" {...register('branch_id')} className={field}>
         {branches.data?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -50,6 +56,12 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
       {errors.tanggal_mulai_kontrak && <p className="text-xs text-red-600">{errors.tanggal_mulai_kontrak.message}</p>}
       <label htmlFor="end">Akhir kontrak</label>
       <input id="end" type="date" {...register('tanggal_akhir_kontrak')} className={field} />
+      <label htmlFor="status">Status</label>
+      <select id="status" {...register('status')} className={field}>
+        <option value="aktif">Aktif</option>
+        <option value="nonaktif">Nonaktif</option>
+        <option value="kontrak_berakhir">Kontrak berakhir</option>
+      </select>
       <Button type="submit" disabled={isSubmitting} className="mt-2 w-full">Simpan</Button>
     </form>
   )
