@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        //
+    }
+
+    public function boot(): void
+    {
+        Request::macro('identity', function () {
+            return $this->attributes->get('identity');
+        });
+    }
+}
