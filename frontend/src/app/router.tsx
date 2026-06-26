@@ -9,6 +9,7 @@ import { NotFound } from '@/app/error/NotFound'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { EmployeesPage } from '@/features/hris/employees/EmployeesPage'
 import { EmployeeDetailPage } from '@/features/hris/employees/EmployeeDetailPage'
+import { OrganizationPage } from '@/features/hris/organization/OrganizationPage'
 
 const HrisDash = lazy(() => import('@/features/hris/dashboard/DashboardPage'))
 const PurchasingDash = lazy(() => import('@/features/purchasing/dashboard/DashboardPage'))
@@ -26,6 +27,9 @@ function AppRoutes() {
               <Route path="/hris/dashboard" element={<HrisDash />} />
               <Route path="/hris/employees" element={<EmployeesPage />} />
               <Route path="/hris/employees/:id" element={<EmployeeDetailPage />} />
+            </Route>
+            <Route element={<RequireRole roles={['superadmin','admin_hrd']} />}>
+              <Route path="/hris/organization" element={<OrganizationPage />} />
             </Route>
             <Route element={<RequireRole roles={['superadmin','admin_purchasing','admin_cabang','staff_purchasing']} />}>
               <Route path="/purchasing/dashboard" element={<PurchasingDash />} />
