@@ -24,3 +24,22 @@ export function useCreatePO() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['po', 'list'] }),
   })
 }
+
+export function usePO(id: number) {
+  return useQuery({ queryKey: qk.po.detail(id), queryFn: async () => (await api.get<PurchaseOrder>(`/purchase-orders/${id}`)).data })
+}
+type Transition = 'submit' | 'approve' | 'receive' | 'cancel'
+export function useTransitionPO(id: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (action: Transition) => (await api.patch<PurchaseOrder>(`/purchase-orders/${id}/${action}`)).data,
+    onSuccess: (po) => { qc.setQueryData(qk.po.detail(id), po); qc.invalidateQueries({ queryKey: ['po', 'list'] }) },
+  })
+}
+export function useRejectPO(id: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (rejection_reason: string) => (await api.patch<PurchaseOrder>(`/purchase-orders/${id}/reject`, { rejection_reason })).data,
+    onSuccess: (po) => { qc.setQueryData(qk.po.detail(id), po); qc.invalidateQueries({ queryKey: ['po', 'list'] }) },
+  })
+}
