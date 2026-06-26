@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useEmployees, type Employee } from './api'
+import { EmployeeForm } from './EmployeeForm'
 import { DataTable, type ColumnDef } from '@/components/shared/DataTable'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Pagination } from '@/components/shared/Pagination'
+import { Modal } from '@/components/shared/Modal'
+import { Button } from '@/components/ui/button'
 
 const columns: ColumnDef<Employee>[] = [
   { accessorKey: 'nomor_induk_karyawan', header: 'NIK', cell: ({ row }) => <Link className="text-[var(--accent)]" to={`/hris/employees/${row.original.id}`}>{row.original.nomor_induk_karyawan}</Link> },
@@ -16,10 +19,14 @@ const columns: ColumnDef<Employee>[] = [
 export function EmployeesPage() {
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState('')
+  const [open, setOpen] = useState(false)
   const { data, isLoading } = useEmployees({ page, status: status || undefined })
   return (
     <div>
-      <PageHeader title="Karyawan" />
+      <PageHeader title="Karyawan" actions={<Button onClick={() => setOpen(true)}>Tambah Karyawan</Button>} />
+      <Modal open={open} title="Tambah Karyawan" onClose={() => setOpen(false)}>
+        <EmployeeForm onDone={() => setOpen(false)} />
+      </Modal>
       <div className="mb-3 flex gap-2">
         <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1) }}
           className="rounded-lg border border-[var(--border)] px-2 py-1.5 text-sm">

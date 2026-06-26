@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { qk } from '@/lib/queryKeys'
+import type { EmployeeInput } from './schema'
 
 export interface Employee {
   id: number; user_id: number; nama_lengkap: string; nomor_induk_karyawan: string; alamat: string
@@ -16,4 +17,32 @@ export function useEmployees(filters: EmployeeFilters) {
     queryKey: qk.employees.list(filters),
     queryFn: async () => (await api.get<Paginated<Employee>>('/employees', { params: filters })).data,
   })
+}
+
+export function useCreateEmployee() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: EmployeeInput) => (await api.post<Employee>('/employees', input)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['employees', 'list'] }),
+  })
+}
+export function useUpdateEmployee(id: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: EmployeeInput) => (await api.put<Employee>(`/employees/${id}`, input)).data,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees', 'list'] }); qc.invalidateQueries({ queryKey: qk.employees.detail(id) }) },
+  })
+}
+export function useDeactivateEmployee() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number) => (await api.patch(`/employees/${id}/deactivate`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['employees', 'list'] }),
+  })
+}
+export function useBranchOptions() {
+  return useQuery({ queryKey: qk.branches.list(), queryFn: async () => (await api.get<Paginated<{ id: number; name: string }>>('/branches')).data.data })
+}
+export function usePositionOptions() {
+  return useQuery({ queryKey: qk.positions.list(), queryFn: async () => (await api.get<Paginated<{ id: number; name: string }>>('/positions')).data.data })
 }
