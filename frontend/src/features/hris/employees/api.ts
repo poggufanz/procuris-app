@@ -41,6 +41,14 @@ export function useDeactivateEmployee() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['employees', 'list'] }),
   })
 }
+export interface UserOption { id: number; name: string; email: string; role: string }
+export function useUserOptions() {
+  return useQuery({
+    queryKey: ['users', 'options'],
+    queryFn: async () =>
+      (await api.get<Paginated<UserOption>>('/auth/users', { params: { is_active: 1 } })).data.data,
+  })
+}
 export function useBranchOptions() {
   return useQuery({ queryKey: qk.branches.list(), queryFn: async () => (await api.get<Paginated<{ id: number; name: string }>>('/branches')).data.data })
 }

@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { employeeSchema, type EmployeeFormInput, type EmployeeInput } from './schema'
-import { useCreateEmployee, useUpdateEmployee, useBranchOptions, usePositionOptions, type Employee } from './api'
+import { useCreateEmployee, useUpdateEmployee, useBranchOptions, usePositionOptions, useUserOptions, type Employee } from './api'
 import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
@@ -11,6 +11,7 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
     resolver: zodResolver(employeeSchema),
     defaultValues: employee ?? { tanggal_akhir_kontrak: null, status: 'aktif' },
   })
+  const users = useUserOptions()
   const branches = useBranchOptions()
   const positions = usePositionOptions()
   const create = useCreateEmployee()
@@ -28,14 +29,18 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
   const field = 'mb-1 w-full rounded-lg border border-[var(--border)] px-3 py-2 text-sm'
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-      <label htmlFor="user">User ID</label>
-      <input id="user" type="number" {...register('user_id')} className={field} disabled={!!employee} />
+      <label htmlFor="user">User</label>
+      {/* ponytail: plain select over active users; server supports ?q= search if the list outgrows this */}
+      <select id="user" {...register('user_id')} className={field} disabled={!!employee}>
+        <option value="">Pilih user…</option>
+        {users.data?.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email}) #{u.id}</option>)}
+      </select>
       {errors.user_id && <p className="text-xs text-red-600">{errors.user_id.message}</p>}
       <label htmlFor="nama">Nama</label>
       <input id="nama" {...register('nama_lengkap')} className={field} />
       {errors.nama_lengkap && <p className="text-xs text-red-600">{errors.nama_lengkap.message}</p>}
       <label htmlFor="nik">NIK</label>
-      <input id="nik" placeholder="2026.01.123" {...register('nomor_induk_karyawan')} className={field} />
+      <input id="nik" placeholder="3204111708950003" {...register('nomor_induk_karyawan')} className={field} />
       {errors.nomor_induk_karyawan && <p className="text-xs text-red-600">{errors.nomor_induk_karyawan.message}</p>}
       <label htmlFor="alamat">Alamat</label>
       <textarea id="alamat" {...register('alamat')} className={field} rows={2} />
