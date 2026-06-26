@@ -9,54 +9,56 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    // user_id values must match the auth-service users (1..6). Branch IDs 1=PUSAT, 2=BDG, 3=SBY
+    // are referenced by auth users.branch_id and purchase POs (snapshotted there).
     public function run(): void
     {
-        $pusat = Branch::create([
-            'name'      => 'Kantor Pusat',
-            'code'      => 'PUSAT',
-            'is_active' => true,
+        $pusat = Branch::updateOrCreate(['code' => 'PUSAT'], [
+            'name' => 'Kantor Pusat', 'parent_id' => null,
+            'address' => 'Jl. Sudirman No. 1, Jakarta', 'is_active' => true,
         ]);
-        $bandung = Branch::create([
-            'name'      => 'Cabang Bandung',
-            'code'      => 'BDG',
-            'parent_id' => $pusat->id,
-            'is_active' => true,
+        $bdg = Branch::updateOrCreate(['code' => 'BDG'], [
+            'name' => 'Cabang Bandung', 'parent_id' => $pusat->id,
+            'address' => 'Jl. Asia Afrika No. 5, Bandung', 'is_active' => true,
         ]);
-
-        $managerHR = Position::create([
-            'name'      => 'Manager HRD',
-            'level'     => 2,
-            'division'  => 'HR',
-            'branch_id' => $pusat->id,
-        ]);
-        $adminCabang = Position::create([
-            'name'      => 'Admin Cabang',
-            'level'     => 3,
-            'division'  => 'Operasional',
-            'branch_id' => $bandung->id,
+        $sby = Branch::updateOrCreate(['code' => 'SBY'], [
+            'name' => 'Cabang Surabaya', 'parent_id' => $pusat->id,
+            'address' => 'Jl. Pemuda No. 10, Surabaya', 'is_active' => true,
         ]);
 
-        Employee::create([
-            'user_id'               => 1,
-            'nama_lengkap'          => 'Siti Rahayu',
-            'nomor_induk_karyawan'  => 'NIK-2026-001',
-            'alamat'                => 'Jl. Sudirman No. 1, Jakarta',
-            'branch_id'             => $pusat->id,
-            'position_id'           => $managerHR->id,
-            'tanggal_gabung'        => '2020-01-15',
-            'tanggal_mulai_kontrak' => '2020-01-15',
-            'status'                => 'aktif',
-        ]);
-        Employee::create([
-            'user_id'               => 2,
-            'nama_lengkap'          => 'Budi Santoso',
-            'nomor_induk_karyawan'  => 'NIK-2026-002',
-            'alamat'                => 'Jl. Asia Afrika No. 5, Bandung',
-            'branch_id'             => $bandung->id,
-            'position_id'           => $adminCabang->id,
-            'tanggal_gabung'        => '2022-03-01',
-            'tanggal_mulai_kontrak' => '2022-03-01',
-            'status'                => 'aktif',
-        ]);
+        $direktur = Position::updateOrCreate(['name' => 'Direktur', 'branch_id' => $pusat->id],
+            ['level' => 1, 'division' => 'Manajemen', 'parent_position_id' => null]);
+        $mgrHrd = Position::updateOrCreate(['name' => 'Manager HRD', 'branch_id' => $pusat->id],
+            ['level' => 2, 'division' => 'HR', 'parent_position_id' => $direktur->id]);
+        $mgrPur = Position::updateOrCreate(['name' => 'Manager Purchasing', 'branch_id' => $pusat->id],
+            ['level' => 2, 'division' => 'Purchasing', 'parent_position_id' => $direktur->id]);
+        $adminCabang = Position::updateOrCreate(['name' => 'Admin Cabang', 'branch_id' => $bdg->id],
+            ['level' => 3, 'division' => 'Operasional', 'parent_position_id' => $mgrHrd->id]);
+        $staffPur = Position::updateOrCreate(['name' => 'Staff Purchasing', 'branch_id' => $bdg->id],
+            ['level' => 4, 'division' => 'Purchasing', 'parent_position_id' => $mgrPur->id]);
+        $staffOps = Position::updateOrCreate(['name' => 'Staff Operasional', 'branch_id' => $sby->id],
+            ['level' => 4, 'division' => 'Operasional', 'parent_position_id' => null]);
+
+        $employees = [
+            ['user_id' => 2, 'nama' => 'Dewi Lestari',  'nik' => 'NIK-2026-002', 'alamat' => 'Jl. Melati No. 2, Jakarta',        'branch' => $pusat, 'pos' => $mgrHrd],
+            ['user_id' => 3, 'nama' => 'Budi Santoso',  'nik' => 'NIK-2026-003', 'alamat' => 'Jl. Asia Afrika No. 5, Bandung',   'branch' => $bdg,   'pos' => $adminCabang],
+            ['user_id' => 4, 'nama' => 'Rina Wijaya',   'nik' => 'NIK-2026-004', 'alamat' => 'Jl. Pemuda No. 10, Surabaya',      'branch' => $sby,   'pos' => $staffOps],
+            ['user_id' => 5, 'nama' => 'Agus Pratama',  'nik' => 'NIK-2026-005', 'alamat' => 'Jl. Gatot Subroto No. 8, Jakarta', 'branch' => $pusat, 'pos' => $mgrPur],
+            ['user_id' => 6, 'nama' => 'Siti Rahayu',   'nik' => 'NIK-2026-006', 'alamat' => 'Jl. Braga No. 3, Bandung',         'branch' => $bdg,   'pos' => $staffPur],
+        ];
+
+        foreach ($employees as $e) {
+            Employee::updateOrCreate(['user_id' => $e['user_id']], [
+                'nama_lengkap'          => $e['nama'],
+                'nomor_induk_karyawan'  => $e['nik'],
+                'alamat'                => $e['alamat'],
+                'branch_id'             => $e['branch']->id,
+                'position_id'           => $e['pos']->id,
+                'tanggal_gabung'        => '2024-01-15',
+                'tanggal_mulai_kontrak' => '2024-01-15',
+                'tanggal_akhir_kontrak' => '2027-01-15',
+                'status'                => 'aktif',
+            ]);
+        }
     }
 }
