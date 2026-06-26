@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import './tokens.css';
+@custom-variant dark (&:where(.dark, .dark *));
+html,body,#root{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
