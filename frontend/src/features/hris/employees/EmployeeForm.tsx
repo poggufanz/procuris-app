@@ -40,7 +40,7 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
       <input id="nama" {...register('nama_lengkap')} className={field} />
       {errors.nama_lengkap && <p className="text-xs text-red-600">{errors.nama_lengkap.message}</p>}
       <label htmlFor="nik">NIK</label>
-      <input id="nik" placeholder="3204111708950003" {...register('nomor_induk_karyawan')} className={field} />
+      <input id="nik" placeholder="2026.01.123" {...register('nomor_induk_karyawan')} className={field} />
       {errors.nomor_induk_karyawan && <p className="text-xs text-red-600">{errors.nomor_induk_karyawan.message}</p>}
       <label htmlFor="alamat">Alamat</label>
       <textarea id="alamat" {...register('alamat')} className={field} rows={2} />
