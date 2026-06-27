@@ -54,7 +54,12 @@ class RedisNotificationRepository implements NotificationRepository
             }
         }
 
-        return compact('items', 'total', 'page', 'per_page');
+        return [
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
+        ];
     }
 
     public function unreadCount(int $userId): int

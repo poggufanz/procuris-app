@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -68,9 +69,32 @@ class AuthController extends Controller
         ]);
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(User::all());
+        $users = User::query()
+            ->when($request->filled('q'), function ($query) use ($request) {
+                $term = '%' . $request->string('q') . '%';
+                $query->where(fn ($q) => $q->where('name', 'like', $term)->orWhere('email', 'like', $term));
+            })
+            ->when($request->filled('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
+            ->orderBy('name')
+            ->paginate(15);
+
+        return response()->json($users);
+    }
+
+    public function lookup(Request $request): JsonResponse
+    {
+        $ids = collect(explode(',', (string) $request->query('ids')))
+            ->map(fn ($v) => (int) trim($v))
+            ->filter()
+            ->unique()
+            ->take(200)
+            ->values();
+
+        $users = $ids->isEmpty() ? [] : User::whereIn('id', $ids)->get(['id', 'name']);
+
+        return response()->json($users);
     }
 
     public function store(StoreUserRequest $request): JsonResponse

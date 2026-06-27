@@ -36,4 +36,25 @@ class OrgChart
             ];
         })->values()->all();
     }
+
+    /** Branch position hierarchy as TreeNode[] (id, name, meta, children), employee's own position flagged. */
+    public static function forEmployee(Employee $employee): array
+    {
+        $positions = Position::where('branch_id', $employee->branch_id)->get();
+        $ids = $positions->pluck('id')->flip();
+        $byParent = $positions->groupBy(fn ($p) =>
+            ($p->parent_position_id !== null && $ids->has($p->parent_position_id)) ? $p->parent_position_id : 0
+        );
+
+        $build = function ($parentId) use (&$build, $byParent, $employee) {
+            return $byParent->get($parentId, collect())->map(fn ($p) => [
+                'id'       => $p->id,
+                'name'     => $p->name,
+                'meta'     => $p->id === $employee->position_id ? $employee->nama_lengkap : $p->division,
+                'children' => $build($p->id),
+            ])->values()->all();
+        };
+
+        return $build(0);
+    }
 }

@@ -11,8 +11,13 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::get('me', [\App\Http\Controllers\AuthController::class, 'me']);
 
+        // names-only, any authenticated caller — lets other services label user_id references
+        Route::get('users/lookup', [\App\Http\Controllers\AuthController::class, 'lookup']);
+
+        Route::get('users', [\App\Http\Controllers\AuthController::class, 'index'])
+            ->middleware('role:superadmin,admin_hrd');
+
         Route::middleware('role.superadmin')->group(function () {
-            Route::get('users', [\App\Http\Controllers\AuthController::class, 'index']);
             Route::post('users', [\App\Http\Controllers\AuthController::class, 'store']);
             Route::put('users/{id}', [\App\Http\Controllers\AuthController::class, 'update']);
             Route::patch('users/{id}/deactivate', [\App\Http\Controllers\AuthController::class, 'deactivate']);

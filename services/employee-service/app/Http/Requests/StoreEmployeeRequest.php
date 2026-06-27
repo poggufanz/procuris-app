@@ -13,7 +13,7 @@ class StoreEmployeeRequest extends FormRequest
         return [
             'user_id'                 => ['required', 'integer', 'unique:employees,user_id'],
             'nama_lengkap'            => ['required', 'string', 'max:150'],
-            'nomor_induk_karyawan'    => ['required', 'string', 'max:30', 'unique:employees,nomor_induk_karyawan'],
+            'nomor_induk_karyawan'    => ['required', 'string', 'max:30', 'regex:/^\d{4}\.\d{2}\.\d+$/', 'unique:employees,nomor_induk_karyawan'],
             'alamat'                  => ['required', 'string'],
             'branch_id'               => ['required', 'integer', 'exists:branches,id'],
             'position_id'             => ['required', 'integer', 'exists:positions,id'],

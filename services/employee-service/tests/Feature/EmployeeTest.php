@@ -40,6 +40,19 @@ it('filters employees by status', function () {
         ->assertOk()->assertJsonCount(1, 'data');
 });
 
+it('filters employees by position division and level', function () {
+    $branch = Branch::factory()->create();
+    $itLead = Position::factory()->create(['branch_id' => $branch->id, 'division' => 'IT', 'level' => 1]);
+    $finStaff = Position::factory()->create(['branch_id' => $branch->id, 'division' => 'Finance', 'level' => 3]);
+    Employee::factory()->create(['branch_id' => $branch->id, 'position_id' => $itLead->id]);
+    Employee::factory()->create(['branch_id' => $branch->id, 'position_id' => $finStaff->id]);
+
+    $this->getJson('/employees?division=IT', actingAsRole('admin_hrd'))
+        ->assertOk()->assertJsonCount(1, 'data');
+    $this->getJson('/employees?level=3', actingAsRole('admin_hrd'))
+        ->assertOk()->assertJsonCount(1, 'data');
+});
+
 it('filters employees by search on nama_lengkap', function () {
     makeEmployee(['nama_lengkap' => 'Budi Santoso']);
     makeEmployee(['nama_lengkap' => 'Ani Wijaya']);
@@ -53,7 +66,7 @@ it('admin_hrd can create employee', function () {
     $payload  = [
         'user_id'                => 99,
         'nama_lengkap'           => 'Test User',
-        'nomor_induk_karyawan'   => 'NIK-001',
+        'nomor_induk_karyawan'   => '2026.01.00001',
         'alamat'                 => 'Jl. Test No. 1',
         'branch_id'              => $branch->id,
         'position_id'            => $position->id,
@@ -71,7 +84,7 @@ it('admin_cabang can create employee in own branch', function () {
     $payload  = [
         'user_id'                => 99,
         'nama_lengkap'           => 'Test User',
-        'nomor_induk_karyawan'   => 'NIK-001',
+        'nomor_induk_karyawan'   => '2026.01.00001',
         'alamat'                 => 'Jl. Test No. 1',
         'branch_id'              => $branch->id,
         'position_id'            => $position->id,
@@ -90,7 +103,7 @@ it('admin_cabang cannot create employee in other branch', function () {
     $payload  = [
         'user_id'                => 99,
         'nama_lengkap'           => 'Test User',
-        'nomor_induk_karyawan'   => 'NIK-001',
+        'nomor_induk_karyawan'   => '2026.01.00001',
         'alamat'                 => 'Jl. Test No. 1',
         'branch_id'              => $other->id,
         'position_id'            => $position->id,

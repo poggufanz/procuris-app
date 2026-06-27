@@ -6,6 +6,7 @@ use App\Http\Requests\EmployeeIndexRequest;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Support\AuthClient;
 use App\Support\OrgChart;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class EmployeeController extends Controller
 
     public function index(EmployeeIndexRequest $request): JsonResponse
     {
-        $query = Employee::query();
+        $query = Employee::query()->with(['branch:id,name', 'position:id,name']);
 
         $scopedBranch = $this->branchScope($request);
         if ($scopedBranch !== null) {
@@ -35,22 +36,39 @@ class EmployeeController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
         }
+        if ($request->filled('division') || $request->filled('level')) {
+            $query->whereHas('position', function ($q) use ($request) {
+                if ($request->filled('division')) {
+                    $q->where('division', $request->input('division'));
+                }
+                if ($request->filled('level')) {
+                    $q->where('level', $request->integer('level'));
+                }
+            });
+        }
         if ($request->filled('search')) {
             $query->where('nama_lengkap', 'like', '%'.$request->input('search').'%');
         }
 
-        return response()->json($query->paginate(15));
+        $page = $query->paginate(15);
+        $names = (new AuthClient())->namesByIds((string) $request->header('Authorization'), $page->pluck('user_id')->all());
+        $page->getCollection()->each(fn ($e) => $e->setAttribute('user_name', $names[$e->user_id] ?? null));
+
+        return response()->json($page);
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $employee = Employee::find($id);
+        $employee = Employee::with(['branch:id,name', 'position:id,name'])->find($id);
         if (! $employee) return response()->json(['message' => 'Not found'], 404);
 
         $scopedBranch = $this->branchScope($request);
         if ($scopedBranch !== null && $employee->branch_id !== $scopedBranch) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
+
+        $names = (new AuthClient())->namesByIds((string) $request->header('Authorization'), [$employee->user_id]);
+        $employee->setAttribute('user_name', $names[$employee->user_id] ?? null);
 
         return response()->json($employee);
     }
@@ -100,8 +118,16 @@ class EmployeeController extends Controller
         return response()->json(null, 204);
     }
 
-    public function orgTree(): JsonResponse
+    public function orgTree(Request $request, int $id): JsonResponse
     {
-        return response()->json(OrgChart::build());
+        $employee = Employee::with('position')->find($id);
+        if (! $employee) return response()->json(['message' => 'Not found'], 404);
+
+        $scopedBranch = $this->branchScope($request);
+        if ($scopedBranch !== null && $employee->branch_id !== $scopedBranch) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return response()->json(OrgChart::forEmployee($employee));
     }
 }
