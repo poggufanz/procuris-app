@@ -51,7 +51,9 @@ The gateway is a zero-dependency Node reverse proxy that routes by path prefix:
 **Service-to-service calls go direct, not through the gateway** (via `*_SERVICE_URL` env):
 Employee → Auth and Purchase → Auth + Employee. There is no shared session store —
 Auth Service's `GET /auth/me` is the single source of truth for identity and role, validated
-on every incoming request to the other services.
+on every incoming request to the other services. Employee Service also calls Auth's
+`GET /auth/users/lookup` (names only) to label cross-service `user_id` references (e.g. an
+employee's linked user account) without exposing the full user list.
 
 ---
 
