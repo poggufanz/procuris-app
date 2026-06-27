@@ -6,7 +6,7 @@ import type { TreeNode } from '@/components/shared/TreeView'
 
 export interface Employee {
   id: number; user_id: number; nama_lengkap: string; nomor_induk_karyawan: string; alamat: string
-  branch_id: number; position_id: number; branch_name?: string; position_name?: string
+  branch_id: number; position_id: number; branch_name?: string; position_name?: string; user_name?: string | null
   tanggal_gabung: string; tanggal_mulai_kontrak: string; tanggal_akhir_kontrak: string | null
   status: 'aktif' | 'nonaktif' | 'kontrak_berakhir'
 }
@@ -59,5 +59,5 @@ export function useEmployee(id: number) {
   return useQuery({ queryKey: qk.employees.detail(id), queryFn: async () => (await api.get<Employee>(`/employees/${id}`)).data })
 }
 export function useOrgTree(id: number) {
-  return useQuery({ queryKey: qk.employees.orgTree(id), queryFn: async () => (await api.get<TreeNode>(`/employees/${id}/org-tree`)).data })
+  return useQuery({ queryKey: qk.employees.orgTree(id), queryFn: async () => (await api.get<TreeNode[]>(`/employees/${id}/org-tree`)).data })
 }

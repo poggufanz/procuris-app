@@ -23,7 +23,7 @@ export const handlers = [
     HttpResponse.json({ id: 1, name: 'Super Admin', email: 'admin@procuris.test', role: 'superadmin', branch_id: null, is_active: true }),
   ),
   http.get('*/employees', () => HttpResponse.json({ data: employees, total: employees.length, per_page: 15, current_page: 1 })),
-  http.get('*/employees/:id/org-tree', () => HttpResponse.json({ id: 2, name: 'Staff IT', children: [] })),
+  http.get('*/employees/:id/org-tree', () => HttpResponse.json([{ id: 2, name: 'Staff IT', meta: 'IT', children: [] }])),
   http.get('*/employees/:id', ({ params }) => HttpResponse.json(employees.find((e) => e.id === Number(params.id)) ?? employees[0])),
   http.post('*/employees', async ({ request }) => HttpResponse.json({ id: 99, ...(await request.json() as object) }, { status: 201 })),
   http.put('*/employees/:id', async ({ request, params }) => HttpResponse.json({ id: Number(params.id), ...(await request.json() as object) })),

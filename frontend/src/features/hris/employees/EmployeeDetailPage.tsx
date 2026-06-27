@@ -23,7 +23,9 @@ export function EmployeeDetailPage() {
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <h3 className="mb-2 font-semibold">Struktur Organisasi</h3>
-          {tree ? <TreeView nodes={[tree]} /> : <p className="text-sm text-[var(--muted)]">Memuat…</p>}
+          {!tree ? <p className="text-sm text-[var(--muted)]">Memuat…</p>
+            : tree.length ? <TreeView nodes={tree} />
+            : <p className="text-sm text-[var(--muted)]">Belum ada struktur</p>}
         </div>
       </div>
     </div>

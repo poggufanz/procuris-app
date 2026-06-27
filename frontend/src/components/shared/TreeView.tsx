@@ -8,7 +8,7 @@ export function TreeView({ nodes, renderActions, depth = 0 }: {
   return (
     <ul className={depth === 0 ? 'space-y-0.5' : 'ml-[15px] space-y-0.5 border-l border-[var(--border)] pl-3.5'}>
       {nodes.map((n) => {
-        const hasChildren = n.children.length > 0
+        const hasChildren = (n.children?.length ?? 0) > 0
         return (
           <li key={n.id}>
             <div className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-[var(--bg)]">
@@ -23,7 +23,7 @@ export function TreeView({ nodes, renderActions, depth = 0 }: {
                 </span>
               )}
             </div>
-            {hasChildren && <TreeView nodes={n.children} renderActions={renderActions} depth={depth + 1} />}
+            {hasChildren && <TreeView nodes={n.children ?? []} renderActions={renderActions} depth={depth + 1} />}
           </li>
         )
       })}

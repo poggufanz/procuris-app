@@ -21,6 +21,11 @@ class Employee extends Model
         'tanggal_akhir_kontrak' => 'date',
     ];
 
+    protected $appends = ['branch_name', 'position_name'];
+
     public function branch() { return $this->belongsTo(Branch::class); }
     public function position() { return $this->belongsTo(Position::class); }
+
+    public function getBranchNameAttribute(): ?string { return $this->branch?->name; }
+    public function getPositionNameAttribute(): ?string { return $this->position?->name; }
 }

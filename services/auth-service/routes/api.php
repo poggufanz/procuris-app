@@ -11,6 +11,9 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::get('me', [\App\Http\Controllers\AuthController::class, 'me']);
 
+        // names-only, any authenticated caller — lets other services label user_id references
+        Route::get('users/lookup', [\App\Http\Controllers\AuthController::class, 'lookup']);
+
         Route::get('users', [\App\Http\Controllers\AuthController::class, 'index'])
             ->middleware('role:superadmin,admin_hrd');
 

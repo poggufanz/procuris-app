@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -9,12 +10,17 @@ import { getApiError } from '@/lib/apiError'
 const nullableNumber = (v: unknown) => v === '' || v == null ? null : Number(v)
 
 export function BranchForm({ branch, onDone }: { branch?: Branch; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<BranchFormInput, unknown, BranchInput>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<BranchFormInput, unknown, BranchInput>({
     resolver: zodResolver(branchSchema),
     defaultValues: branch ?? { parent_id: null, address: null, is_active: true },
   })
   const branches = useBranches()
   const save = useSaveBranch(branch?.id)
+  // re-apply default once parent <option>s exist, else the parent select shows blank on edit
+  useEffect(() => {
+    if (branch && branches.data) reset(branch)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branches.data])
 
   const onSubmit = async (data: BranchInput) => {
     try {

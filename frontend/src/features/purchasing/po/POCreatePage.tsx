@@ -63,8 +63,8 @@ export function POCreatePage() {
             <select className={field} value={r.item_id} onChange={(e) => setRow(i, { item_id: Number(e.target.value) })}>
               {items.data?.data.map((it) => <option key={it.id} value={it.id}>{it.name}</option>)}
             </select>
-            <input aria-label="Qty" type="number" className={field} value={r.quantity || ''} onChange={(e) => setRow(i, { quantity: Number(e.target.value) })} />
-            <input aria-label="Harga" type="number" className={field} value={r.unit_price || ''} onChange={(e) => setRow(i, { unit_price: Number(e.target.value) })} />
+            <input aria-label="Qty" placeholder="Jumlah" type="number" min="1" className={field} value={r.quantity || ''} onChange={(e) => setRow(i, { quantity: Number(e.target.value) })} />
+            <input aria-label="Harga" placeholder="Harga satuan (Rp)" type="number" min="0" className={field} value={r.unit_price || ''} onChange={(e) => setRow(i, { unit_price: Number(e.target.value) })} />
             <div className="text-right font-mono text-sm">{format.rupiah(r.quantity * r.unit_price)}</div>
           </div>
         ))}

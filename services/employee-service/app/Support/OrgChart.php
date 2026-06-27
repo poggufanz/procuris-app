@@ -37,50 +37,24 @@ class OrgChart
         })->values()->all();
     }
 
+    /** Branch position hierarchy as TreeNode[] (id, name, meta, children), employee's own position flagged. */
     public static function forEmployee(Employee $employee): array
     {
-        $position = $employee->position;
+        $positions = Position::where('branch_id', $employee->branch_id)->get();
+        $ids = $positions->pluck('id')->flip();
+        $byParent = $positions->groupBy(fn ($p) =>
+            ($p->parent_position_id !== null && $ids->has($p->parent_position_id)) ? $p->parent_position_id : 0
+        );
 
-        $superiors = [];
-        $current = $position?->parent;
-        while ($current) {
-            $superiors[] = self::positionNode($current);
-            $current = $current->parent;
-        }
+        $build = function ($parentId) use (&$build, $byParent, $employee) {
+            return $byParent->get($parentId, collect())->map(fn ($p) => [
+                'id'       => $p->id,
+                'name'     => $p->name,
+                'meta'     => $p->id === $employee->position_id ? $employee->nama_lengkap : $p->division,
+                'children' => $build($p->id),
+            ])->values()->all();
+        };
 
-        $subordinates = $position
-            ? Position::where('parent_position_id', $position->id)
-                ->where('branch_id', $employee->branch_id)
-                ->get()
-                ->map(fn ($p) => self::positionNode($p))
-                ->all()
-            : [];
-
-        return [
-            'employee' => [
-                'id'           => $employee->id,
-                'nama_lengkap' => $employee->nama_lengkap,
-                'status'       => $employee->status,
-                'branch_id'    => $employee->branch_id,
-            ],
-            'position'     => $position ? self::positionNode($position) : null,
-            'superiors'    => $superiors,
-            'subordinates' => $subordinates,
-        ];
-    }
-
-    private static function positionNode(Position $position): array
-    {
-        return [
-            'id'        => $position->id,
-            'name'      => $position->name,
-            'level'     => $position->level,
-            'division'  => $position->division,
-            'employees' => $position->employees()->get()->map(fn ($e) => [
-                'id'           => $e->id,
-                'nama_lengkap' => $e->nama_lengkap,
-                'status'       => $e->status,
-            ])->values()->all(),
-        ];
+        return $build(0);
     }
 }

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -11,13 +12,19 @@ const LEVELS: Record<number, string> = { 1: 'Staff', 2: 'Supervisor', 3: 'Manage
 const nullableNumber = (v: unknown) => v === '' || v == null ? null : Number(v)
 
 export function PositionForm({ position, onDone }: { position?: Position; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<PositionFormInput, unknown, PositionInput>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<PositionFormInput, unknown, PositionInput>({
     resolver: zodResolver(positionSchema),
     defaultValues: position ?? { level: 1, parent_position_id: null, branch_id: null },
   })
   const positions = usePositions()
   const branches = useBranches()
   const save = useSavePosition(position?.id)
+  // re-apply default once atasan/cabang <option>s exist, else those selects show blank on edit
+  const optionsReady = !!positions.data && !!branches.data
+  useEffect(() => {
+    if (position && optionsReady) reset(position)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [optionsReady])
 
   const onSubmit = async (data: PositionInput) => {
     try {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -9,12 +10,17 @@ import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
 export function UserForm({ user, onDone }: { user?: UserAccount; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<UserFormInput, unknown, UserInput>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<UserFormInput, unknown, UserInput>({
     resolver: zodResolver(userSchema),
     defaultValues: user ?? { branch_id: null },
   })
   const branches = useBranches()
   const save = useSaveUser(user?.id)
+  // re-apply default once cabang <option>s exist, else the branch select shows blank on edit
+  useEffect(() => {
+    if (user && branches.data) reset(user)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [branches.data])
 
   const onSubmit = async (data: UserInput) => {
     try {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -8,12 +9,17 @@ import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
 export function ItemForm({ item, onDone }: { item?: Item; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ItemFormInput, unknown, ItemInput>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ItemFormInput, unknown, ItemInput>({
     resolver: zodResolver(itemSchema),
     defaultValues: item ?? { description: '', default_vendor_id: null },
   })
   const vendors = useVendors({})
   const save = useSaveItem(item?.id)
+  // re-apply default once vendor <option>s exist, else the default-vendor select shows blank on edit
+  useEffect(() => {
+    if (item && vendors.data) reset(item)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vendors.data])
 
   const onSubmit = async (data: ItemInput) => {
     try {

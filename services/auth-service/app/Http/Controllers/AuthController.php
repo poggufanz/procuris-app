@@ -83,6 +83,20 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
+    public function lookup(Request $request): JsonResponse
+    {
+        $ids = collect(explode(',', (string) $request->query('ids')))
+            ->map(fn ($v) => (int) trim($v))
+            ->filter()
+            ->unique()
+            ->take(200)
+            ->values();
+
+        $users = $ids->isEmpty() ? [] : User::whereIn('id', $ids)->get(['id', 'name']);
+
+        return response()->json($users);
+    }
+
     public function store(StoreUserRequest $request): JsonResponse
     {
         $user = User::create($request->validated());

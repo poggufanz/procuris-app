@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -6,14 +7,25 @@ import { useCreateEmployee, useUpdateEmployee, useBranchOptions, usePositionOpti
 import { Button } from '@/components/ui/button'
 import { getApiError } from '@/lib/apiError'
 
+const toDate = (v: string) => v.slice(0, 10)
+
 export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone: () => void }) {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EmployeeFormInput, unknown, EmployeeInput>({
+  const defaults = employee
+    ? { ...employee, tanggal_gabung: toDate(employee.tanggal_gabung), tanggal_mulai_kontrak: toDate(employee.tanggal_mulai_kontrak), tanggal_akhir_kontrak: employee.tanggal_akhir_kontrak ? toDate(employee.tanggal_akhir_kontrak) : null }
+    : { tanggal_akhir_kontrak: null, status: 'aktif' as const }
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<EmployeeFormInput, unknown, EmployeeInput>({
     resolver: zodResolver(employeeSchema),
-    defaultValues: employee ?? { tanggal_akhir_kontrak: null, status: 'aktif' },
+    defaultValues: defaults,
   })
   const users = useUserOptions()
   const branches = useBranchOptions()
   const positions = usePositionOptions()
+  // re-apply defaults as each async option list lands; a value only sticks once its <option> exists.
+  // keyed per-query so a slow/failing /auth/users can't block cabang & jabatan from filling.
+  useEffect(() => {
+    if (employee) reset(defaults)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users.data, branches.data, positions.data])
   const create = useCreateEmployee()
   const update = useUpdateEmployee(employee?.id ?? 0)
 
@@ -33,6 +45,10 @@ export function EmployeeForm({ employee, onDone }: { employee?: Employee; onDone
       {/* ponytail: plain select over active users; server supports ?q= search if the list outgrows this */}
       <select id="user" {...register('user_id')} className={field} disabled={!!employee}>
         <option value="">Pilih user…</option>
+        {/* disabled on edit: guarantee the stored user shows even if it's inactive / paged-out / role-gated from /auth/users */}
+        {employee && !users.data?.some((u) => u.id === employee.user_id) && (
+          <option value={employee.user_id}>{employee.user_name ?? `User #${employee.user_id}`}</option>
+        )}
         {users.data?.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email}) #{u.id}</option>)}
       </select>
       {errors.user_id && <p className="text-xs text-red-600">{errors.user_id.message}</p>}
