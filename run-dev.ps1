@@ -1,4 +1,11 @@
 # Procuris local dev bring-up: MySQL per-schema + Redis + php -S + Node gateway.
+#
+# This is the HOST-PHP path (needs local PHP 8.4+/bcmath, Node, MySQL). For a fully
+# containerized stack (no local PHP/Node/MySQL), use Docker instead:
+#     cp .env.example .env   # fill APP_KEY / JWT_SECRET / MYSQL_ROOT_PASSWORD
+#     docker compose up --build -d
+#     docker compose exec auth-service php artisan db:seed --force   # first run only
+# See RUN.md > "Docker Compose (full stack)".
 # Brings up auth(8001) employee(8002) purchase(8003) notification(8004) + gateway(8080).
 # Requires MySQL running on $DbHost:$DbPort with 4 schemas: db_auth / db_hrm / db_purchasing / db_notification.
 # Notification inbox lives in Redis ($RedisPort); auto-started via docker if not already up

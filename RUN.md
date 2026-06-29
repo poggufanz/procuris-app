@@ -48,12 +48,29 @@ terminal so `docker` is on `PATH` (the script also falls back to
 No Docker? Run Redis yourself (Memurai native Windows, or Redis in WSL) and pass `-SkipRedis`. The
 script auto-sets `REDIS_CLIENT=predis` in `notification-service/.env` on every run.
 
-## Production-ish (MySQL + Redis)
+## Docker Compose (full stack)
+Root `docker-compose.yml` brings up the whole system: MySQL (one schema per service,
+auto-created by `docker/mysql-init.sql`), Redis, the four services (php-fpm+nginx+supervisor),
+the Node gateway, and the SPA served by nginx.
+
+```bash
+cp .env.example .env                                   # then fill APP_KEY / JWT_SECRET / MYSQL_ROOT_PASSWORD
+docker compose run --rm auth-service php artisan key:generate --show   # paste into APP_KEY
+docker compose run --rm auth-service php artisan jwt:secret --show     # paste into JWT_SECRET
+docker compose up --build
+```
+
+- SPA: http://localhost:8081  •  Gateway: http://localhost:8080  (`/health` for targets)
+- Each service runs `php artisan migrate --force` on start (entrypoint waits for MySQL first).
+- First run only — seed the auth login: `docker compose exec auth-service php artisan db:seed --force`
+  (then log in as `super@procuris.test` / `password`).
+- Services aren't published to the host; the gateway reaches them over the compose network by name.
+
+## Production-ish (manual MySQL + Redis, no compose)
 Point each service `.env` at MySQL (`DB_CONNECTION=mysql`, one schema per service:
-`db_auth`, `db_hrm`, `db_purchasing`) and a shared Redis, then `php artisan migrate --seed`
-per service. Run each behind php-fpm/nginx and keep the gateway (or replace it with an nginx
-reverse proxy using the same prefix table above). No root docker-compose exists yet — that's the
-remaining infra TODO.
+`db_auth`, `db_hrm`, `db_purchasing`, `db_notification`) and a shared Redis, then
+`php artisan migrate --seed` per service. Run each behind php-fpm/nginx and keep the gateway
+(or replace it with an nginx reverse proxy using the same prefix table above).
 
 ## Notes
 - `php artisan serve` fails to bind on some Windows PHP builds; the scripts use `php -S 127.0.0.1:PORT -t public`.
