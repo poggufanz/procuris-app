@@ -23,7 +23,7 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN chmod +x /usr/local/bin/entrypoint \
     && chown -R www-data:www-data storage bootstrap/cache
 
-EXPOSE 8001
+EXPOSE 8003
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
