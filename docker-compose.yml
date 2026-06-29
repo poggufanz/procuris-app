@@ -1,0 +1,126 @@
+name: procuris
+
+# Single stack: MySQL (one schema per service) + Redis + 4 backend services
+# behind a Node API gateway, with the React SPA served by nginx.
+# Service-to-service calls go direct via *_SERVICE_URL (container DNS); the
+# browser only ever talks to the gateway on :8080.
+
+x-laravel-env: &laravel-env
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_KEY: "${APP_KEY:?set APP_KEY in .env (php artisan key:generate --show)}"
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  # ponytail: dev stack uses the root account for all 4 schemas; for prod give
+  # each service a least-privilege user scoped to its own schema.
+  DB_USERNAME: root
+  DB_PASSWORD: "${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"
+
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql-init.sql:/docker-entrypoint-initdb.d/01-schemas.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    # ponytail: not published to host — services reach it via compose DNS (mysql:3306).
+    # Add "ports: [3307:3306]" only if you need a host GUI; 3306 collides with local MySQL.
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  auth-service:
+    build: ./services/auth-service
+    environment:
+      <<: *laravel-env
+      DB_DATABASE: db_auth
+      JWT_SECRET: "${JWT_SECRET:?set JWT_SECRET in .env (php artisan jwt:secret --show)}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  employee-service:
+    build: ./services/employee-service
+    environment:
+      <<: *laravel-env
+      DB_DATABASE: db_hrm
+      AUTH_SERVICE_URL: http://auth-service:8001
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+
+  purchase-service:
+    build: ./services/purchase-service
+    environment:
+      <<: *laravel-env
+      DB_DATABASE: db_purchasing
+      AUTH_SERVICE_URL: http://auth-service:8001
+      EMPLOYEE_SERVICE_URL: http://employee-service:8002
+    depends_on:
+      mysql:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      employee-service:
+        condition: service_started
+
+  notification-service:
+    build: ./services/notification-service
+    environment:
+      <<: *laravel-env
+      DB_DATABASE: db_notification
+      AUTH_SERVICE_URL: http://auth-service:8001
+      EMPLOYEE_SERVICE_URL: http://employee-service:8002
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  gateway:
+    build: ./gateway
+    environment:
+      GATEWAY_PORT: "8080"
+      AUTH_URL: http://auth-service:8001
+      EMPLOYEE_URL: http://employee-service:8002
+      PURCHASE_URL: http://purchase-service:8003
+      NOTIFICATION_URL: http://notification-service:8004
+      FRONTEND_URL: http://localhost:8081
+      GATEWAY_ALLOWED_ORIGINS: http://localhost:8081,http://127.0.0.1:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - employee-service
+      - purchase-service
+      - notification-service
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_GATEWAY_URL: ${VITE_API_GATEWAY_URL:-http://localhost:8080}
+    ports:
+      - "8081:80"
+    depends_on:
+      - gateway
+
+volumes:
+  db_data:

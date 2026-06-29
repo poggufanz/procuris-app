@@ -61,7 +61,7 @@ employee's linked user account) without exposing the full user list.
 
 | Layer | Stack |
 |---|---|
-| Backend services | PHP 8.2, Laravel 11, Pest (tests) |
+| Backend services | PHP 8.4, Laravel 11, Pest (tests) |
 | Auth | `tymon/jwt-auth` (JWT access + refresh, refresh-token blacklist on logout) |
 | Notifications | Redis via `predis` / `phpredis` |
 | Gateway | Node (built-in `http`, no dependencies) |
@@ -108,8 +108,11 @@ draft/submitted → cancelled
 
 ```
 procuris-app/
-├── gateway/gateway.mjs        # Node reverse proxy (:8080)
-├── run-dev.ps1                # one-shot: migrate + seed + start 4 services + gateway (Windows)
+├── docker-compose.yml         # full stack: MySQL + Redis + 4 services + gateway + SPA
+├── .env.example               # compose secrets (APP_KEY, JWT_SECRET, MYSQL_ROOT_PASSWORD)
+├── docker/mysql-init.sql      # creates the 4 per-service schemas on first MySQL boot
+├── gateway/gateway.mjs        # Node reverse proxy (:8080)  (+ Dockerfile)
+├── run-dev.ps1                # one-shot host-PHP dev: migrate + seed + start 4 services + gateway (Windows)
 ├── services/
 │   ├── auth-service/          # Laravel — JWT auth + RBAC (:8001, db_auth)
 │   ├── employee-service/      # Laravel — branches/positions/employees (:8002, db_hrm)
@@ -125,7 +128,13 @@ procuris-app/
 
 ## Prerequisites
 
-- **PHP 8.2+** with Composer
+**Docker route (simplest):** just **Docker Desktop / Docker Engine** — no local PHP, Node, MySQL,
+or Redis needed. See [Docker Compose](#docker-compose-full-stack).
+
+**Local route** (`run-dev.ps1` / manual):
+
+- **PHP 8.4+** with Composer + the **`bcmath`** extension (the lock pins Symfony 8.1 / Carbon 3.13,
+  which require PHP ≥ 8.4.1; purchase-service needs `bcmath` for PO money math)
 - **Node 18+** (20+ recommended) with npm
 - **MySQL 8** — for the default `run-dev.ps1` flow (or use SQLite for a no-DB-server quick run; see RUN.md)
 - **Redis 6+** + the `phpredis` extension — only needed for the notification inbox
@@ -135,6 +144,30 @@ procuris-app/
 ---
 
 ## Quick start
+
+### Docker Compose (full stack)
+
+Everything in containers — MySQL (4 schemas auto-created), Redis, the four services, the gateway,
+and the SPA. No local PHP/Node/MySQL needed:
+
+```bash
+# from procuris-app/
+cp .env.example .env
+docker compose run --rm auth-service php artisan key:generate --show   # paste into APP_KEY
+docker compose run --rm auth-service php artisan jwt:secret --show     # paste into JWT_SECRET
+docker compose up --build -d
+docker compose exec auth-service php artisan db:seed --force           # first run only (seeds admin)
+```
+
+- SPA → <http://localhost:8081>  •  Gateway → <http://localhost:8080> (`/health` lists targets)
+- Log in: `super@procuris.test` / `password`
+- MySQL/Redis aren't published to the host (avoids clashing with a local MySQL on 3306); services
+  reach them over the compose network by name. Low-RAM Docker VM? Build serially with
+  `COMPOSE_PARALLEL_LIMIT=1` to avoid OOM during the parallel image builds.
+
+Verified end-to-end: `up --build` → seed → `POST /auth/login` through the gateway returns a valid JWT.
+
+### Local (host PHP + Node)
 
 **Windows (recommended)** — `run-dev.ps1` copies each `.env`, generates keys + JWT secret,
 migrates, seeds the auth admin, and starts all four services plus the gateway:
@@ -198,5 +231,6 @@ npm run lint        # oxlint
 
 All four services and the frontend are coded with tests passing, verified end-to-end through the
 gateway (login, `/auth/me`, branches, positions, vendors, items, purchase-orders incl.
-cross-service JWT validation). **Remaining infra TODO:** no root `docker-compose` / orchestration
-yet — see the production notes in [RUN.md](RUN.md).
+cross-service JWT validation). The full stack is **containerized** — `docker compose up --build`
+boots MySQL + Redis + all services + gateway + SPA, smoke-tested green (login through the gateway
+returns a valid JWT). See [Docker Compose](#docker-compose-full-stack) and [RUN.md](RUN.md).
